@@ -3,12 +3,14 @@
  import DemandePret from '../../views/adherent/DemandePret.vue'
  import SuiviPret from '../../views/adherent/SuiviPret.vue'
  import Attestation from '../../views/adherent/Attestation.vue'
+ import attestationRedevance from '../../views/adherent/attestationRedevance.vue'
  import impressionAttestation from '../../views/adherent/impressionAttestation.vue'
 
 const adherentRoute= [
     
 
     { path: '/impressionAttestation',name: 'impressionAttestation', component: impressionAttestation,},
+    { path: '/attestationRedevance/:id',name: 'attestationRedevance', component: attestationRedevance,},
     { path: '/Attestation',name: 'Attestation', component: Attestation,},
     { path: '/DemandePret',name: 'DemandePret', component: DemandePret,},
     { path: '/SuiviPret',name: 'SuiviPret', component: SuiviPret,},

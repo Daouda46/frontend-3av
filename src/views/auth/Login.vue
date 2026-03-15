@@ -458,7 +458,7 @@ const getParticleStyle = (n: number) => {
   .welcome-title {
     font-size: 1.8rem;
   }
-   
+  
   .login-logo {
     width: 100px;
     height: 100px;
