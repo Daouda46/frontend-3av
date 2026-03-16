@@ -29,8 +29,8 @@
           <span class="stat-label">Montant total des prêts</span>
           <span class="stat-value">{{ formatCurrency(montantTotal) }}</span>
           <span class="stat-trend positive">
-            <iconify-icon icon="solar:arrow-rise-bold-duotone"></iconify-icon>
-            +12.5%
+            <!-- <iconify-icon icon="solar:arrow-rise-bold-duotone"></iconify-icon>
+            +12.5% -->
           </span>
         </div>
       </div>
@@ -255,273 +255,307 @@
 </template>
 
 <script setup lang="ts">
-import ApexCharts from 'vue3-apexcharts'
-import { ref, computed, onMounted } from 'vue'
-import * as XLSX from 'xlsx'
-import jsPDF from 'jspdf'
-import { useDemandePrestation } from '../../stores/prestation/demandePrestation'
-import 'jspdf-autotable'
-import Loader from '../../components/Loader.vue'
-import { usePret } from '../../stores/finance/pret'
+import ApexCharts from "vue3-apexcharts"
+import { ref, computed, onMounted } from "vue"
+import * as XLSX from "xlsx"
+import jsPDF from "jspdf"
+import "jspdf-autotable"
+import Loader from "../../components/Loader.vue"
+
+import { useDemandePrestation } from "../../stores/prestation/demandePrestation"
+import { usePret } from "../../stores/finance/pret"
 
 const pretStore = usePret()
 const demandePrestationStore = useDemandePrestation()
+
 const isLoading = ref(false)
 
-// Données des prêts
-const pret = pretStore.getterPret
 
-// Taux de réussite
-const tauxReussite = computed(() => {
-  const total = pret.length
-  if (total === 0) return 0
-  const acceptes = accepterTaile.value
-  return Math.round((acceptes / total) * 100)
-})
+// =========================
+// DONNÉES RÉACTIVES
+// =========================
 
-// Nombre de prêts
-const encoursTaile = computed(() => pret.filter((item) => item.statut === 1).length)
-const accepterTaile = computed(() => pret.filter((item) => item.statut === 2).length)
-const refuserTaile = computed(() => pret.filter((item) => item.statut === 3).length)
+const pret = computed(() => pretStore.getterPret || [])
+const demandes = computed(() => demandePrestationStore.getterDemandePrestation || [])
 
-// Nombre de prestation
-const encoursDemandeTaile = computed(() => 
-  demandePrestationStore.getterDemandePrestation.filter((item) => item.statut === 1).length
-)
-const accepterDemandeTaile = computed(() => 
-  demandePrestationStore.getterDemandePrestation.filter((item) => item.statut === 2).length
-)
-const refuserDemandeTaile = computed(() => 
-  demandePrestationStore.getterDemandePrestation.filter((item) => item.statut === 3).length
+
+
+// =========================
+// STATISTIQUES PRÊTS
+// =========================
+
+const encoursTaile = computed(() =>
+  pret.value.filter((item) => item.statut === 1).length
 )
 
-// Totaux montants prêts
+const accepterTaile = computed(() =>
+  pret.value.filter((item) => item.statut === 2).length
+)
+
+const refuserTaile = computed(() =>
+  pret.value.filter((item) => item.statut === 3).length
+)
+
+
+// =========================
+// STATISTIQUES PRESTATIONS
+// =========================
+
+const encoursDemandeTaile = computed(() =>
+  demandes.value.filter((item) => item.statut === 1).length
+)
+
+const accepterDemandeTaile = computed(() =>
+  demandes.value.filter((item) => item.statut === 2).length
+)
+
+const refuserDemandeTaile = computed(() =>
+  demandes.value.filter((item) => item.statut === 3).length
+)
+
+
+// =========================
+// TOTALS PRÊTS
+// =========================
+
 const totalEncours = computed(() =>
-  pret.filter((item) => item.statut === 1)
-    .reduce((sum, item) => sum + Number(item.montant || 0), 0)
-)
-const totalAccepter = computed(() =>
-  pret.filter((item) => item.statut === 2)
-    .reduce((sum, item) => sum + Number(item.montant || 0), 0)
-)
-const totalRefuser = computed(() =>
-  pret.filter((item) => item.statut === 3)
-    .reduce((sum, item) => sum + Number(item.montant || 0), 0)
-)
-
-// Totaux montants demandes
-const totalDemandeEncours = computed(() =>
-  demandePrestationStore.getterDemandePrestation
+  pret.value
     .filter((item) => item.statut === 1)
     .reduce((sum, item) => sum + Number(item.montant || 0), 0)
 )
-const totalDemandeAccepter = computed(() =>
-  demandePrestationStore.getterDemandePrestation
+
+const totalAccepter = computed(() =>
+  pret.value
     .filter((item) => item.statut === 2)
     .reduce((sum, item) => sum + Number(item.montant || 0), 0)
 )
-const totalDemandeRefuser = computed(() =>
-  demandePrestationStore.getterDemandePrestation
+
+const totalRefuser = computed(() =>
+  pret.value
     .filter((item) => item.statut === 3)
     .reduce((sum, item) => sum + Number(item.montant || 0), 0)
 )
 
-// Montant total global
-const montantTotal = computed(() => pret.reduce((acc, p) => acc + p.montant, 0))
 
-// Options des graphiques
+// =========================
+// TOTALS PRESTATIONS
+// =========================
+
+const totalDemandeEncours = computed(() =>
+  demandes.value
+    .filter((item) => item.statut === 1)
+    .reduce((sum, item) => sum + Number(item.montant || 0), 0)
+)
+
+const totalDemandeAccepter = computed(() =>
+  demandes.value
+    .filter((item) => item.statut === 2)
+    .reduce((sum, item) => sum + Number(item.montant || 0), 0)
+)
+
+const totalDemandeRefuser = computed(() =>
+  demandes.value
+    .filter((item) => item.statut === 3)
+    .reduce((sum, item) => sum + Number(item.montant || 0), 0)
+)
+
+
+// =========================
+// TOTAL GLOBAL
+// =========================
+
+const montantTotal = computed(() =>
+  pret.value.reduce((acc, p) => acc + Number(p.montant || 0), 0)
+)
+
+
+// =========================
+// TAUX DE RÉUSSITE
+// =========================
+
+const tauxReussite = computed(() => {
+  const total = pret.value.length
+
+  if (total === 0) return 0
+
+  return Math.round((accepterTaile.value / total) * 100)
+})
+
+
+
+// =========================
+// CHART BAR
+// =========================
+
 const statusChartOptions = {
   chart: {
-    type: 'bar',
-    toolbar: { show: false },
-    animations: {
-      enabled: true,
-      easing: 'easeinout',
-      speed: 800
-    }
+    type: "bar",
+    toolbar: { show: false }
   },
-  colors: ['#f59e0b', '#10b981', '#ef4444'],
+
+  colors: ["#f59e0b", "#10b981", "#ef4444"],
+
   plotOptions: {
     bar: {
       borderRadius: 8,
-      columnWidth: '60%',
-      distributed: true,
-      dataLabels: {
-        position: 'top'
-      }
+      columnWidth: "60%",
+      distributed: true
     }
   },
-  dataLabels: {
-    enabled: true,
-    formatter: (val: number) => val.toLocaleString('fr-FR'),
-    offsetY: -20,
-    style: {
-      fontSize: '12px',
-      colors: ['#304758']
-    }
-  },
-  grid: {
-    borderColor: '#e2e8f0',
-    strokeDashArray: 4
-  },
+
   xaxis: {
-    categories: ['En cours', 'Acceptés', 'Refusés'],
-    labels: {
-      style: {
-        colors: ['#f59e0b', '#10b981', '#ef4444'],
-        fontSize: '14px',
-        fontWeight: 600
-      }
-    }
+    categories: ["En cours", "Acceptés", "Refusés"]
   },
-  yaxis: {
-    title: {
-      text: 'Montant (FCFA)',
-      style: {
-        fontSize: '12px',
-        fontWeight: 500
-      }
-    },
-    labels: {
-      formatter: (val: number) => val.toLocaleString('fr-FR')
-    }
-  },
+
   tooltip: {
-    theme: 'dark',
     y: {
-      formatter: (val: number) => val.toLocaleString('fr-FR') + ' FCFA'
+      formatter: (val: number) => val.toLocaleString("fr-FR") + " FCFA"
     }
   }
 }
 
 const statusChartSeries = computed(() => [
   {
-    name: 'Montant',
-    data: [totalEncours.value, totalAccepter.value, totalRefuser.value]
+    name: "Montant",
+    data: [
+      totalEncours.value,
+      totalAccepter.value,
+      totalRefuser.value
+    ]
   }
 ])
 
+
+
+// =========================
+// CHART DONUT
+// =========================
+
 const modeChartOptions = {
   chart: {
-    type: 'donut',
-    animations: {
-      enabled: true,
-      easing: 'easeinout',
-      speed: 800
-    }
+    type: "donut"
   },
-  colors: ['#f97316', '#facc15', '#10b981', '#3b82f6', '#a855f7'],
-  labels: ['Orange Money', 'MTN Money', 'Moov Money', 'Wave', 'Cash'],
+
+  labels: ["Orange Money", "MTN Money", "Moov Money", "Wave", "Cash"],
+
   legend: {
-    position: 'bottom',
-    horizontalAlign: 'center',
-    fontSize: '14px'
-  },
-  plotOptions: {
-    pie: {
-      donut: {
-        size: '70%',
-        labels: {
-          show: true,
-          total: {
-            show: true,
-            label: 'Total',
-            formatter: () => montantTotal.value.toLocaleString('fr-FR') + ' FCFA'
-          }
-        }
-      }
-    }
-  },
-  dataLabels: {
-    enabled: true,
-    formatter: (val: number) => val.toFixed(1) + '%'
-  },
-  tooltip: {
-    theme: 'dark',
-    y: {
-      formatter: (val: number) => val.toLocaleString('fr-FR') + ' FCFA'
-    }
+    position: "bottom"
   }
 }
 
 const modeChartSeries = computed(() => {
+
   const totals = [0, 0, 0, 0, 0]
-  pret.forEach((p) => {
-    const mode = p.mode_paiement?.toUpperCase() || ''
+
+  pret.value.forEach((p) => {
+
+    const mode = p.mode_paiement?.toUpperCase() || ""
     const montant = Number(p.montant) || 0
-    if (mode.includes('ORANGE')) totals[0] += montant
-    else if (mode.includes('MTN')) totals[1] += montant
-    else if (mode.includes('MOOV')) totals[2] += montant
-    else if (mode.includes('WAVE')) totals[3] += montant
-    else if (mode.includes('CASH')) totals[4] += montant
+
+    if (mode.includes("ORANGE")) totals[0] += montant
+    else if (mode.includes("MTN")) totals[1] += montant
+    else if (mode.includes("MOOV")) totals[2] += montant
+    else if (mode.includes("WAVE")) totals[3] += montant
+    else totals[4] += montant
+
   })
+
   return totals
 })
 
-// Format devise
+
+
+// =========================
+// FORMAT MONNAIE
+// =========================
+
 function formatCurrency(value: number) {
-  return value.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+
+  return value.toLocaleString("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  })
 }
 
-// Export Excel
+
+
+// =========================
+// EXPORT EXCEL
+// =========================
+
 function exportExcel() {
-  const ws = XLSX.utils.json_to_sheet(pret)
+
+  const ws = XLSX.utils.json_to_sheet(pret.value)
+
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'Prêts')
-  XLSX.writeFile(wb, 'prets.xlsx')
+
+  XLSX.utils.book_append_sheet(wb, ws, "Prêts")
+
+  XLSX.writeFile(wb, "prets.xlsx")
 }
 
-// Export PDF
+
+
+// =========================
+// EXPORT PDF
+// =========================
+
 function exportPDF() {
+
   const doc = new jsPDF()
-  doc.setFontSize(16)
-  doc.setTextColor(58, 123, 213)
-  doc.text('Tableau de bord des prêts', 14, 20)
-  
-  doc.setFontSize(11)
-  doc.setTextColor(100, 116, 139)
-  doc.text(`Généré le ${new Date().toLocaleDateString('fr-FR')}`, 14, 30)
-  
-  const table = pret.map((p) => [
+
+  doc.text("Tableau de bord des prêts", 14, 20)
+
+  const table = pret.value.map((p) => [
+
     p.id,
     p.nom_prenom,
-    p.montant.toLocaleString('fr-FR') + ' FCFA',
+    p.montant + " FCFA",
     p.mode_paiement,
-    p.statut === 1 ? 'En cours' : p.statut === 2 ? 'Accepté' : 'Refusé'
+    p.statut === 1
+      ? "En cours"
+      : p.statut === 2
+      ? "Accepté"
+      : "Refusé"
   ])
-  
+
   ;(doc as any).autoTable({
-    head: [['ID', 'Nom', 'Montant', 'Mode', 'Statut']],
+    head: [["ID", "Nom", "Montant", "Mode", "Statut"]],
     body: table,
-    startY: 40,
-    theme: 'striped',
-    headStyles: {
-      fillColor: [58, 123, 213],
-      textColor: [255, 255, 255],
-      fontSize: 11
-    },
-    styles: {
-      fontSize: 10,
-      cellPadding: 5
-    }
+    startY: 30
   })
-  
-  doc.save('prets.pdf')
+
+  doc.save("prets.pdf")
 }
 
+
+
+// =========================
+// CHARGEMENT DATA
+// =========================
+
 onMounted(async () => {
+
   try {
+
     isLoading.value = true
-    await pretStore.getPret()
-    await demandePrestationStore.getDemandePrestation()
+
+    await Promise.all([
+      pretStore.getPret(),
+      demandePrestationStore.getDemandePrestation()
+    ])
+
   } catch (error) {
-    console.error('Erreur lors du chargement:', error)
+
+    console.error("Erreur chargement", error)
+
   } finally {
+
     isLoading.value = false
   }
+
 })
 </script>
-
 <style scoped>
 .dashboard-container {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);

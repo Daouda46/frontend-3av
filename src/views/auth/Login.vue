@@ -76,7 +76,7 @@
           </form>
           
           <div class="copyright">
-            &copy; {{ new Date().getFullYear() }} 3AV - Tous droits réservés
+            &copy; {{ new Date().getFullYear() }} 3AV - Tous droits réservés -  Version 2.0
           </div>
         </div>
       </div>

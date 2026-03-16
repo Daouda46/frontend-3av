@@ -92,8 +92,8 @@
               <th>Trimestre</th>
               <th class="text-end">Cotisation</th>
               <th class="text-end">Exceptionnelle</th>
-              <th class="text-center">Nbre retraite</th>
-              <th class="text-center">Nbre décès</th>
+              <th class="text-center">Nbre <br> retraite</th>
+              <th class="text-center">Nbre <br> décès</th>
               <th class="text-end">Total</th>
               <th class="text-center">Statut</th>
               <th class="text-center">Actions</th>
@@ -866,6 +866,7 @@ onMounted(async () => {
 .trimestre-badge {
   display: inline-block;
   padding: 4px 12px;
+  width: 140px;
   background: #8b5cf6;
   color: white;
   border-radius: 20px;
