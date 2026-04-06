@@ -2,10 +2,10 @@
   <div>
     <!-- Header fixe -->
     <div class="app-topstrip bg-dark py-3 px-4 w-100 d-flex align-items-center justify-content-between">
-      <!-- Marquee avec message de bienvenue -->
+      <!-- Marquee avec message de bienvenue personnalisé -->
       <div class="marquee">
         <div class="marquee-content">
-          🎉 Bienvenue à l'Amicale des Agents Vérificateurs et Assimilés 🎉
+          {{ greetingMessage }}
         </div>
       </div>
 
@@ -13,7 +13,6 @@
       <div class="clock-container">
         <div class="clock">
           <span class="clock-time">{{ currentTime }}</span>
-          <!-- <span class="clock-timezone">UTC</span> -->
         </div>
       </div>
 
@@ -40,12 +39,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const menuOpen = ref(false);
 const currentTime = ref('');
+const user = ref(null);
 
 let timerInterval = null;
 
@@ -66,37 +66,27 @@ const updateUTCTime = () => {
   currentTime.value = `${hours}:${minutes}:${seconds}`;
 };
 
-// Version avec date complète si besoin
-const updateFullUTCDateTime = () => {
+// Message de bienvenue personnalisé selon l'heure et l'utilisateur
+const greetingMessage = computed(() => {
   const now = new Date();
+  const hours = now.getUTCHours(); // Heure UTC
   
-  // Options de formatage pour une date lisible
-  const options = {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    timeZone: 'UTC',
-    timeZoneName: 'short'
-  };
+  let greeting = '';
   
-  currentTime.value = now.toLocaleString('fr-FR', options);
-};
-
-// Version avec format personnalisé
-const updateCustomUTCTime = () => {
-  const now = new Date();
+  // Déterminer la salutation selon l'heure UTC
+  if (hours >= 5 && hours < 13) {
+    greeting = 'Bonjour';
+  } else if (hours >= 13 && hours < 18) {
+    greeting = 'Bonsoir';
+  } else {
+    greeting = 'Bonsoir';
+  }
   
-  const hours = now.getUTCHours().toString().padStart(2, '0');
-  const minutes = now.getUTCMinutes().toString().padStart(2, '0');
-  const seconds = now.getUTCSeconds().toString().padStart(2, '0');
+  // Récupérer le nom de l'utilisateur
+  const userName = 'M./Mme '+ user.value?.nom+' '+user.value?.prenom || 'Cher Membre';
   
-  // Format: 14:30:45 UTC
-  currentTime.value = `${hours}:${minutes}:${seconds}`;
-};
+  return `${greeting} ${userName}, Bienvenue à l'Amicale des Agents Vérificateurs et Assimilés`;
+});
 
 const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;
@@ -118,11 +108,21 @@ const SuiviPretView = () => {
 };
 
 onMounted(() => {
-  // Mettre à jour immédiatement
-  updateCustomUTCTime();
+  // Récupérer l'utilisateur depuis localStorage
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      user.value = JSON.parse(storedUser);
+    } catch (e) {
+      console.error('Erreur lors du parsing de l\'utilisateur:', e);
+    }
+  }
+  
+  // Mettre à jour l'heure immédiatement
+  updateUTCTime();
   
   // Puis toutes les secondes
-  timerInterval = setInterval(updateCustomUTCTime, 1000);
+  timerInterval = setInterval(updateUTCTime, 1000);
 });
 
 onUnmounted(() => {
@@ -271,12 +271,6 @@ onUnmounted(() => {
   text-decoration: none;
   box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
 }
-
-/* Pour éviter que le contenu soit caché sous le header fixe */
-/* .main-content {
-  margin-top: 80px;
-  min-height: calc(100vh - 80px);
-} */
 
 /* Responsive */
 @media (max-width: 992px) {
