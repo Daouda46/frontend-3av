@@ -610,7 +610,7 @@ const getAvatarColor = (name: string) => {
 const formatPersonnel = () => {
   return personnelStore.getterPersonnel.map(p => ({
     id: p.id,
-    libelle: `${p.nom} ${p.prenom}`
+    libelle: `${p.matricule}-${p.nom}-${p.prenom}`
   }))
 }
 

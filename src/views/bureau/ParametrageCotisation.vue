@@ -208,7 +208,7 @@
                 <select class="form-select" v-model="form.trimestre_id">
                   <option value="">Sélectionnez un trimestre</option>
                   <option v-for="item in trimestreParAnnee" :key="item.id" :value="item.id">
-                    Trimestre {{ item.trimestre }} - {{ item.annee }}
+                     {{ item.trimestre }} - {{ item.annee }}
                   </option>
                 </select>
               </div>
@@ -335,7 +335,7 @@
                 <select class="form-select" v-model="formData.trimestre_id">
                   <option value="">Sélectionnez un trimestre</option>
                   <option v-for="item in trimestreParAnneeEdit" :key="item.id" :value="item.id">
-                    Trimestre {{ item.trimestre }} - {{ item.annee }}
+                     {{ item.trimestre }} - {{ item.annee }}
                   </option>
                 </select>
               </div>
