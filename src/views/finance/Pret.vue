@@ -1,7 +1,7 @@
 <template>
   <div class="pret-page">
     <Loader :isLoading="isLoading" />
-    
+
     <!-- En-tête avec titre stylisé -->
     <div class="page-header mb-4">
       <div class="row align-items-center">
@@ -139,9 +139,10 @@
               <th>Prénom</th>
               <th>Contact</th>
               <th>Mode de Paiement</th>
-              <th>Date emprunt</th>
+              <th>Date d'emprunt</th>
               <th class="text-end">Montant (FCFA)</th>
-              <th class="text-end">Montant Total (FCFA)</th>
+              <th class="text-end">Montant Total</th>
+              <th class="text-center">Bulletin de solde</th>
               <th class="text-center">Statut</th>
               <th class="text-center">Actions</th>
             </tr>
@@ -154,14 +155,27 @@
               <td>{{ item.nom }}</td>
               <td>{{ item.prenom }}</td>
               <td>{{ item.contact }}</td>
-              <td><span class="payment-badge">{{ item.mode_paiement }}</span></td>
+              <td>
+                <span class="payment-badge">{{ item.mode_paiement }}</span>
+              </td>
               <td>{{ item.date_emprunt }}</td>
               <td class="text-end montant">{{ formatageMontant(item.montant) }}</td>
               <td class="text-end montant-total">{{ formatageMontant(item.montant_total) }}</td>
               <td class="text-center">
-                <span class="status-badge pending">
-                  <i class="bi bi-clock me-1"></i> Encours
-                </span>
+                <a
+                  v-if="item.fichier"
+                  :href="`${file_url}/${item.fichier}`"
+                  target="_blank"
+                  class="file-link"
+                  :title="getFileName(item.fichier)"
+                >
+                  <i class="bi bi-file-earmark"></i>
+                  <span>Fichier</span>
+                </a>
+                <span v-else class="text-muted">-</span>
+              </td>
+              <td class="text-center">
+                <span class="status-badge pending"> <i class="bi bi-clock me-1"></i> Encours </span>
               </td>
               <td class="text-center">
                 <button @click="showEditModal(item.id)" class="btn-action">
@@ -183,7 +197,9 @@
             <tr class="table-total">
               <td colspan="6" class="text-end fw-bold">TOTAL</td>
               <td class="text-end montant fw-bold">{{ formatageMontant(totalMontantEncours) }}</td>
-              <td class="text-end montant-total fw-bold">{{ formatageMontant(totalMontantGlobalEncours) }}</td>
+              <td class="text-end montant-total fw-bold">
+                {{ formatageMontant(totalMontantGlobalEncours) }}
+              </td>
               <td colspan="2"></td>
             </tr>
           </tfoot>
@@ -208,6 +224,7 @@
               <th>Date emprunt</th>
               <th class="text-end">Montant (FCFA)</th>
               <th class="text-end">Montant Total (FCFA)</th>
+              <th class="text-center">Bulletin de solde</th>
               <th class="text-center">Statut</th>
               <th class="text-center">Actions</th>
             </tr>
@@ -220,10 +237,25 @@
               <td>{{ item.nom }}</td>
               <td>{{ item.prenom }}</td>
               <td>{{ item.contact }}</td>
-              <td><span class="payment-badge">{{ item.mode_paiement }}</span></td>
+              <td>
+                <span class="payment-badge">{{ item.mode_paiement }}</span>
+              </td>
               <td>{{ item.date_emprunt }}</td>
               <td class="text-end montant">{{ formatageMontant(item.montant) }}</td>
               <td class="text-end montant-total">{{ formatageMontant(item.montant_total) }}</td>
+               <td class="text-center">
+                <a
+                  v-if="item.fichier"
+                  :href="`${file_url}/${item.fichier}`"
+                  target="_blank"
+                  class="file-link"
+                  :title="getFileName(item.fichier)"
+                >
+                  <i class="bi bi-file-earmark"></i>
+                  <span>Fichier</span>
+                </a>
+                <span v-else class="text-muted">Non Renseigné</span>
+              </td>
               <td class="text-center">
                 <span v-if="item.payer == 'PAYER'" class="status-badge success">
                   <i class="bi bi-check-circle me-1"></i> {{ item.payer }}
@@ -236,7 +268,11 @@
                 </span>
               </td>
               <td class="text-center">
-                <button v-if="item.payer === 'PAYER'" @click="showEditModalActivaion(item.id)" class="btn-action success">
+                <button
+                  v-if="item.payer === 'PAYER'"
+                  @click="showEditModalActivaion(item.id)"
+                  class="btn-action success"
+                >
                   <i class="bi bi-pencil-square"></i>
                   <span class="btn-text">Activer</span>
                 </button>
@@ -259,7 +295,9 @@
             <tr class="table-total">
               <td colspan="6" class="text-end fw-bold">TOTAL</td>
               <td class="text-end montant fw-bold">{{ formatageMontant(totalMontantAccepter) }}</td>
-              <td class="text-end montant-total fw-bold">{{ formatageMontant(totalMontantGlobalAccepter) }}</td>
+              <td class="text-end montant-total fw-bold">
+                {{ formatageMontant(totalMontantGlobalAccepter) }}
+              </td>
               <td colspan="2"></td>
             </tr>
           </tfoot>
@@ -284,6 +322,7 @@
               <th>Date emprunt</th>
               <th class="text-end">Montant (FCFA)</th>
               <th class="text-end">Montant Total (FCFA)</th>
+               <th class="text-center">Bulletin de solde</th>
               <th class="text-center">Statut</th>
               <th class="text-center">Actions</th>
             </tr>
@@ -296,10 +335,25 @@
               <td>{{ item.nom }}</td>
               <td>{{ item.prenom }}</td>
               <td>{{ item.contact }}</td>
-              <td><span class="payment-badge">{{ item.mode_paiement }}</span></td>
+              <td>
+                <span class="payment-badge">{{ item.mode_paiement }}</span>
+              </td>
               <td>{{ item.date_emprunt }}</td>
               <td class="text-end montant">{{ formatageMontant(item.montant) }}</td>
               <td class="text-end montant-total">{{ formatageMontant(item.montant_total) }}</td>
+                <td class="text-center">
+                <a
+                  v-if="item.fichier"
+                  :href="`${file_url}/${item.fichier}`"
+                  target="_blank"
+                  class="file-link"
+                  :title="getFileName(item.fichier)"
+                >
+                  <i class="bi bi-file-earmark"></i>
+                  <span>Fichier</span>
+                </a>
+                <span v-else class="text-muted">Non Renseigné</span>
+              </td>
               <td class="text-center">
                 <span class="status-badge rejected">
                   <i class="bi bi-x-circle me-1"></i> Refusé
@@ -325,14 +379,16 @@
             <tr class="table-total">
               <td colspan="6" class="text-end fw-bold">TOTAL</td>
               <td class="text-end montant fw-bold">{{ formatageMontant(totalMontantRefuser) }}</td>
-              <td class="text-end montant-total fw-bold">{{ formatageMontant(totalMontantGlobalRefuser) }}</td>
+              <td class="text-end montant-total fw-bold">
+                {{ formatageMontant(totalMontantGlobalRefuser) }}
+              </td>
               <td colspan="2"></td>
             </tr>
           </tfoot>
         </table>
       </div>
     </div>
-    
+
     <!-- DEBUT DES MODALS -->
     <!-- Modal décision trésorière -->
     <div
@@ -372,7 +428,9 @@
                 </div>
               </div>
               <div class="mb-3" v-if="formEdit.statut == 4">
-                <label class="form-label">Montant disponible <span style="color:red">*</span> </label>
+                <label class="form-label"
+                  >Montant disponible <span style="color: red">*</span>
+                </label>
                 <input type="number" class="form-control" v-model="formEdit.montant" />
               </div>
               <div class="mb-3" v-if="formEdit.statut == 4">
@@ -400,7 +458,9 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            <button type="button" class="btn btn-primary" @click="pretDecisionTreso">Valider</button>
+            <button type="button" class="btn btn-primary" @click="pretDecisionTreso">
+              Valider
+            </button>
           </div>
         </div>
       </div>
@@ -445,7 +505,9 @@
                 </div>
               </div>
               <div class="mb-3" v-if="formEdit.statut == 4">
-                <label class="form-label">Montant disponible <span style="color:red">*</span> </label>
+                <label class="form-label"
+                  >Montant disponible <span style="color: red">*</span>
+                </label>
                 <input type="number" class="form-control" v-model="formEdit.montant" />
               </div>
               <div class="mb-3" v-if="formEdit.statut == 4">
@@ -563,7 +625,11 @@
                 <label class="form-label" for="validationCustom02">Année</label>
                 <select class="form-select" v-model="formData.annee_id">
                   <option value=""></option>
-                  <option v-for="(item, index) in exerciceStore.getterExerciceBudgetaire" :key="index" :value="item.id">
+                  <option
+                    v-for="(item, index) in exerciceStore.getterExerciceBudgetaire"
+                    :key="index"
+                    :value="item.id"
+                  >
                     {{ item.annee }}
                   </option>
                 </select>
@@ -591,7 +657,9 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            <button type="button" class="btn btn-primary" @click="ValiderActivation">Valider</button>
+            <button type="button" class="btn btn-primary" @click="ValiderActivation">
+              Valider
+            </button>
           </div>
         </div>
       </div>
@@ -627,6 +695,9 @@ const modalRefEditPayer = ref<HTMLDivElement | null>(null)
 const modalRefEditTreso = ref<HTMLDivElement | null>(null)
 const modalRefActivation = ref<HTMLDivElement | null>(null)
 const isLoading = ref(false)
+const file_url = import.meta.env.VITE_FILE_URL
+
+const previewfichier = ref<string | null>(null)
 const form = reactive({
   statut: 0,
 })
@@ -652,16 +723,18 @@ const formEdit = reactive({
   payer: '',
   observation: '',
 })
-
+const getFileName = (filePath: string) => {
+  return filePath?.split('/').pop() || ''
+}
 const trimestreParAnnee = computed(() => {
   return trimestreStore.getterTrimestre.filter(
-    (item) => String(item.annee) === String(trouveAnnee.value)
+    (item) => String(item.annee) === String(trouveAnnee.value),
   )
 })
 
 const trouveAnnee = computed(() => {
   const year = exerciceStore.getterExerciceBudgetaire.find(
-    (item) => String(item.id) === String(formData.annee_id)
+    (item) => String(item.id) === String(formData.annee_id),
   )
   if (year) {
     return year.annee
@@ -765,7 +838,7 @@ const filteredPret = computed(() => {
     (item) =>
       item.nom?.toLowerCase().includes(keyword) ||
       item.prenom?.toLowerCase().includes(keyword) ||
-      item.contact?.toLowerCase().includes(keyword)
+      item.contact?.toLowerCase().includes(keyword),
   )
 })
 
@@ -791,7 +864,7 @@ const closeModal = () => {
   const modalTreso = Modal.getInstance(modalRefEditTreso.value)
   const modalPayer = Modal.getInstance(modalRefEditPayer.value)
   const modalActivation = Modal.getInstance(modalRefActivation.value)
-  
+
   if (modal) modal.hide()
   if (modalTreso) modalTreso.hide()
   if (modalPayer) modalPayer.hide()
@@ -1018,6 +1091,35 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Montant */
+.montant {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+/* File link */
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: #f1f5f9;
+  border-radius: 20px;
+  color: #475569;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+}
+
+.file-link:hover {
+  background: #f59e0b;
+  color: white;
+}
+
+.file-link i {
+  font-size: 1rem;
+}
 /* Page container */
 .pret-page {
   padding: 20px;
@@ -1154,10 +1256,22 @@ onMounted(async () => {
   font-size: 1.5rem;
 }
 
-.stat-card.bg-soft-primary .stat-icon { background: rgba(58, 123, 213, 0.1); color: #3a7bd5; }
-.stat-card.bg-soft-success .stat-icon { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.stat-card.bg-soft-danger .stat-icon { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-.stat-card.bg-soft-info .stat-icon { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.stat-card.bg-soft-primary .stat-icon {
+  background: rgba(58, 123, 213, 0.1);
+  color: #3a7bd5;
+}
+.stat-card.bg-soft-success .stat-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+.stat-card.bg-soft-danger .stat-icon {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+.stat-card.bg-soft-info .stat-icon {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
 
 .stat-content {
   flex: 1;
@@ -1371,19 +1485,19 @@ onMounted(async () => {
   .pret-page {
     padding: 10px;
   }
-  
+
   .btn-text {
     display: none;
   }
-  
+
   .btn-action {
     padding: 8px;
   }
-  
+
   .stat-value {
     font-size: 1.2rem;
   }
-  
+
   .nav-tab {
     padding: 8px 16px;
     font-size: 0.85rem;

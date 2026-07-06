@@ -118,7 +118,7 @@
               </td>
               <td class="text-center">
                 <button 
-                    @click="fonctionView(item.id)"   
+                    @click="fonctionView(item.id, (index + 1))"   
                   class="btn-action primary"
                   title="Voir la fiche"
                 >
@@ -539,10 +539,10 @@ const isLoading = ref(false)
 const router = useRouter();
 
 
-const fonctionView = (id) => {
+const fonctionView = (id,numero) => {
   router.push({
     name: "attestationRedevance",
-    params: { id: id }
+    params: { id: id, numero:numero }
   });
 };
 interface Attestation {

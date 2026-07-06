@@ -50,13 +50,12 @@
             <p class="devise">Union – Discipline – Travail</p>
           </div>
         </div>
-
         <div class="reference">
-          <span class="ref-number">N°{{ numero }}/{{ annee }}/3AV/Sg</span>
+          <span class="ref-number"> N°{{ numeroFormate }}/{{ anneeEncours }}/3AV/Sg</span>
         </div>
 
         <h2 class="attestation-title">
-          ATTESTATION DE <span v-if="attestation.redevance == 'non'">NON</span>  REDEVANCE N°{{ numero }}/{{ annee }}
+          ATTESTATION DE <span v-if="attestation.redevance == 'non'">NON</span>  REDEVANCE N°{{ numeroFormate }}/{{ anneeEncours }}
         </h2>
 
         <div class="content">
@@ -110,7 +109,7 @@
             </div>
             <p class="simple-president-title"><strong>Le Président</strong></p>
               <!-- Référence centrée -->
-        <p class="reference-simple">N°{{ numero }}/{{ annee }}/3AV/Sg</p>
+        <p class="reference-simple"> N°{{ numeroFormate }}/{{ anneeEncours }}/3AV/Sg</p>
           </div>
 
           <!-- République et devise à droite -->
@@ -123,7 +122,7 @@
       
 
         <!-- Titre -->
-        <h2 class="title-simple">ATTESTATION DE <span v-if="attestation.redevance == 'non'">NON</span> REDEVANCE N°{{ numero }}/{{ annee }}</h2>
+        <h2 class="title-simple">ATTESTATION DE <span v-if="attestation.redevance == 'non'">NON</span> REDEVANCE N°{{ numeroFormate }}/{{ anneeEncours }}</h2>
 
         <!-- Corps du texte -->
         <div class="body-simple">
@@ -165,20 +164,25 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue"
+import { ref, computed,onMounted} from "vue"
 import { useRouter, useRoute } from "vue-router"
 import html2pdf from "html2pdf.js"
 import { useAttestation } from '../../stores/auth/attestation'
 import { formatageMontant, formatageMontantCFA } from '../../config/utils'
+import { useExerciceBudgetaireStore } from '../../stores/parametrage/exerciceBudgetaire'
+
 
 import writtenNumber from 'written-number'
 
 writtenNumber.defaults.lang = 'fr'
 
+const isLoading = ref(false)
 const route = useRoute()
 const attestationStore = useAttestation()
 const router = useRouter()
+const exerciceStore = useExerciceBudgetaireStore()
 const id = route.params.id
+const numero = route.params.numero
 
 // État pour le template actif
 const activeTemplate = ref('classic') // 'classic' ou 'simple'
@@ -187,7 +191,7 @@ const attestation = computed(() =>
   attestationStore.getterAttestation.find(item => item.id == id)
 )
 
-const numero = ref("03")
+const numero1 = ref("03")
 const annee = ref("2025")
 const president = ref("Aboubakar Sidick BERTE")
 const direction = ref("Direction du Contrôle Financier")
@@ -217,13 +221,22 @@ const matriculeFormate = computed(() => {
   if (!matricule) return ""
   return matricule.replace(/^(\d{3})(\d+)/, "$1 $2")
 })
-
+const numeroFormate = computed(() => {
+  return String(numero).padStart(2, '0');
+});
+const anneeEncours = computed(() => {
+  return (
+    exerciceStore.getterExerciceBudgetaire.find(
+      item => item.encours === 1
+    )?.annee ?? null
+  );
+});
 const generatePDF = async () => {
   const element = document.getElementById(`attestation-content-${activeTemplate.value}`)
   
   const options = {
     margin: 0,
-    filename: `attestation_${nomComplet.value}_${numero.value}_${annee.value}.pdf`,
+    filename: `attestation_${nomComplet.value}_${anneeEncours.value}.pdf`,
     image: { type: "jpeg", quality: 1 },
     html2canvas: {
       scale: 2, // Réduit de 4 à 2 pour éviter le débordement
@@ -246,6 +259,28 @@ const generatePDF = async () => {
 const goBack = () => {
   router.back()
 }
+onMounted(async () => {
+  try {
+    isLoading.value = true
+    await exerciceStore.getExerciceBudgetaire()
+  } catch (error) {
+    console.error('Erreur lors du chargement des fonctions:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
+// onMounted(async () => {
+//   try {
+//     isLoading.value = true
+//     await Promise.all([
+//       exerciceStore.getExerciceBudgetaire()
+//     ])
+//   } catch (error) {
+//     console.error('Erreur lors du chargement:', error)
+//   } finally {
+//     isLoading.value = false
+//   }
+// })
 </script>
 
 <style scoped>
@@ -399,8 +434,8 @@ const goBack = () => {
 }
 
 .devise {
-  background: #003366;
-  color: #FFD700;
+  /* background: #003366; */
+  color: #000;
   padding: 2px 4px; /* Réduit le padding */
   border-radius: 16px;
   font-size: 16px; /* Réduit de 18px à 16px */

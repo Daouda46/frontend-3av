@@ -101,13 +101,13 @@
     <!-- Tableau des remboursements -->
     <div class="table-wrapper">
       <div class="table-responsive">
-        <table class="table modern-table">
-          <thead class="table-header-custom">
+        <table class="table table-hover align-middle modern-table">
+          <thead >
             <tr>
               <th class="text-center">N°</th>
               <th>Bénéficiaire</th>
               <th>Contact</th>
-              <th>Mode</th>
+              <th>Mode Paiement</th>
               <th>Date emprunt</th>
               <th class="text-end">Montant total</th>
               <th class="text-end">Déjà remboursé</th>
@@ -141,7 +141,7 @@
               <td>
                 <span class="payment-badge">{{ item.mode_paiement || 'N/D' }}</span>
               </td>
-              <td>{{ formatDate(item.date_emprunt) }}</td>
+              <td>{{ (item.date_emprunt) }}</td>
               <td class="text-end montant">{{ formatageMontant(item.montant_total) }}</td>
               <td class="text-end montant-rembourse">{{ formatageMontant(item.montant_rembourser) }}</td>
               <td class="text-end montant-restant">{{ formatageMontant(soustraireMontants(item.montant_total, item.montant_rembourser)) }}</td>

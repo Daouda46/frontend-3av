@@ -8,18 +8,18 @@ export function useAuth(router: Router) {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('user')
 
-  .then(() => {
+  // .then(() => {
+  //     router.replace('/connexion')
+  //   })
+    Swal.fire({
+      icon: 'warning',  
+      title: 'Session expirée',
+    //  text: 'Vous allez être redirigé vers la page de connexion.',
+      timer: 1000,
+      showConfirmButton: false
+    }).then(() => {
       router.replace('/connexion')
     })
-    // Swal.fire({
-    //   icon: 'warning',  
-    //   title: 'Session expirée',
-    // //  text: 'Vous allez être redirigé vers la page de connexion.',
-    //   timer: 1000,
-    //   showConfirmButton: false
-    // }).then(() => {
-    //   router.replace('/connexion')
-    // })
   }
 
   apiClient.interceptors.response.use(

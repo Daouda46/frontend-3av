@@ -137,7 +137,7 @@
                 <span class="prestation-badge">{{ item.libelle || 'N/D' }}</span>
               </td>
               <td class="text-end montant">{{ formatageMontant(item.montant) }}</td>
-              <td>{{ formatDate(item.date_demande) }}</td>
+              <td>{{ (item.date_demande) }}</td>
               <td class="text-center">
                 <a
                   v-if="item.fichier"

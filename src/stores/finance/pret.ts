@@ -16,6 +16,7 @@ import { authHeader } from "@/config/authHeader";
   statut?: number;
   payer?: string;
   mode_paiement?: string;
+  fichier?: string;
   nom_prenom?: string;
   date_emprunt?: Date;
   date_tresorie?: string;

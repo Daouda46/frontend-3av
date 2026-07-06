@@ -10,7 +10,7 @@ const adherentRoute= [
     
 
     { path: '/impressionAttestation',name: 'impressionAttestation', component: impressionAttestation,},
-    { path: '/attestationRedevance/:id',name: 'attestationRedevance', component: attestationRedevance,},
+    { path: '/attestationRedevance/:id/:numero',name: 'attestationRedevance', component: attestationRedevance,},
     { path: '/Attestation',name: 'Attestation', component: Attestation,},
     { path: '/DemandePret',name: 'DemandePret', component: DemandePret,},
     { path: '/SuiviPret',name: 'SuiviPret', component: SuiviPret,},
