@@ -13,7 +13,7 @@
             class="tab-btn" 
             :class="{ active: activeTemplate === 'classic' }"
             @click="activeTemplate = 'classic'"
-          >
+          > 
             📄 Nouveau Modèle
           </button>
           <button 
@@ -27,7 +27,7 @@
       </div>
 
       <button class="btn btn-primary" @click="generatePDF">
-        📥 Télécharger PDF
+        📥 Télécharger PDF 
       </button>
     </div>
 
@@ -51,11 +51,12 @@
           </div>
         </div>
         <div class="reference">
-          <span class="ref-number"> N°{{ numeroFormate }}/{{ anneeEncours }}/3AV/Sg</span>
+          <span v-if="isPresident()" class="ref-number"> N°{{ numeroFormate }}/{{ anneeEncours }}/{{pdtSignature}}</span>
+          <span v-else class="ref-number"> N°{{ numeroFormate }}/{{ anneeEncours }}/{{SgSignature}}</span>
         </div>
 
         <h2 class="attestation-title">
-          ATTESTATION DE <span v-if="attestation.redevance == 'non'">NON</span>  REDEVANCE N°{{ numeroFormate }}/{{ anneeEncours }}
+          ATTESTATION DE <span style="text-decoration:underline" v-if="attestation.redevance == 'non'">NON</span>  REDEVANCE N°{{ numeroFormate }}/{{ anneeEncours }}
         </h2>
 
         <div class="content">
@@ -109,7 +110,11 @@
             </div>
             <p class="simple-president-title"><strong>Le Président</strong></p>
               <!-- Référence centrée -->
-        <p class="reference-simple"> N°{{ numeroFormate }}/{{ anneeEncours }}/3AV/Sg</p>
+        <!-- <p class="reference-simple"> 
+          N°{{ numeroFormate }}/{{ anneeEncours }}/3AV/Sg
+          </p> -->
+          <p v-if="isPresident()" class="reference-simple"> N°{{ numeroFormate }}/{{ anneeEncours }}/{{pdtSignature}}</p>
+          <p v-else class="reference-simple"> N°{{ numeroFormate }}/{{ anneeEncours }}/{{SgSignature}}</p>
           </div>
 
           <!-- République et devise à droite -->
@@ -122,7 +127,7 @@
       
 
         <!-- Titre -->
-        <h2 class="title-simple">ATTESTATION DE <span v-if="attestation.redevance == 'non'">NON</span> REDEVANCE N°{{ numeroFormate }}/{{ anneeEncours }}</h2>
+        <h2 class="title-simple">ATTESTATION DE <span style="text-decoration:underline" v-if="attestation.redevance == 'non'">NON</span> REDEVANCE N°{{ numeroFormate }}/{{ anneeEncours }}</h2>
 
         <!-- Corps du texte -->
         <div class="body-simple">
@@ -183,7 +188,7 @@ const router = useRouter()
 const exerciceStore = useExerciceBudgetaireStore()
 const id = route.params.id
 const numero = route.params.numero
-
+const user = ref(null);
 // État pour le template actif
 const activeTemplate = ref('classic') // 'classic' ou 'simple'
 
@@ -193,6 +198,9 @@ const attestation = computed(() =>
 
 const numero1 = ref("03")
 const annee = ref("2025")
+const PdtMatricule = ref("320140N")
+const pdtSignature = ref("3AV/Pdt")
+const SgSignature = ref("3AV/Sg")
 const president = ref("Aboubakar Sidick BERTE")
 const direction = ref("Direction du Contrôle Financier")
 
@@ -203,7 +211,16 @@ const getDateToday = () => {
   const annee = today.getFullYear()
   return `${jour}/${mois}/${annee}`
 }
+// Récupérer le matricule de l'utilisateur
+  const getMatricule = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user?.matricule || '';
+};
+const userMatricule = getMatricule();
 
+const isPresident = () => {
+    return userMatricule === PdtMatricule.value;
+};
 const date = ref(getDateToday())
 
 function montantEnLettres(montant) {
@@ -260,6 +277,16 @@ const goBack = () => {
   router.back()
 }
 onMounted(async () => {
+   // Récupérer l'utilisateur depuis localStorage
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      user.value = JSON.parse(storedUser);
+      
+    } catch (e) {
+      console.error('Erreur lors du parsing de l\'utilisateur:', e);
+    }
+  }
   try {
     isLoading.value = true
     await exerciceStore.getExerciceBudgetaire()
@@ -379,7 +406,7 @@ onMounted(async () => {
   min-height: auto; /* Changé de min-height:297mm à auto */
   height: auto; /* Ajouté */
   max-height: 297mm; /* Ajouté pour limiter à 1 page */
-  padding: 15mm 20mm; /* Réduit de 20mm à 15mm en haut/bas */
+  padding: 20mm 15mm; /* Réduit de 20mm à 15mm en haut/bas */
   box-sizing: border-box;
   background: white;
   font-family: 'Times New Roman', serif;
@@ -645,7 +672,7 @@ onMounted(async () => {
   
   .attestation-document {
     box-shadow: none;
-    padding: 15mm 20mm; /* Réduit pour l'impression aussi */
+    padding: 20mm 15mm; /* Réduit pour l'impression aussi */
     height: auto;
     min-height: auto;
     max-height: 297mm;
